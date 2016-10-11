@@ -12,6 +12,7 @@ from pyVmomi import vim
 from pyVmomi import vmodl
 from pyVim import connect
 
+import ssl
 
 def get_args():
     """
@@ -39,6 +40,9 @@ def get_args():
     parser.add_argument('-d', '--dscluster', required=True, action='store',
                         help='Name of vSphere Datastore Cluster')
 
+    parser.add_argument('-i', '--insecure', required=False, default=False,
+                        action='store_true', help='Ignore server certificate')
+
     args = parser.parse_args()
     return args
 
@@ -49,12 +53,18 @@ def main():
    """
 
     args = get_args()
+    ssl_options = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH,
+                                            capath=None, cadata=None)
+    if args.insecure:
+        ssl_options.check_hostname = False
+        ssl_options.verify_mode = ssl.CERT_NONE
 
     try:
         service_instance = connect.SmartConnect(host=args.host,
                                                 user=args.user,
                                                 pwd=args.password,
-                                                port=int(args.port))
+                                                port=int(args.port),
+                                                sslContext=ssl_options)
         if not service_instance:
             print("Could not connect to the specified host using "
                   "specified username and password")
