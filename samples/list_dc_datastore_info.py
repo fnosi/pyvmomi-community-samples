@@ -17,6 +17,8 @@ from tools import cli
 from pyVmomi import vim
 from pyVim.connect import SmartConnect, Disconnect
 
+import ssl
+
 # disable  urllib3 warnings
 if hasattr(requests.packages.urllib3, 'disable_warnings'):
     requests.packages.urllib3.disable_warnings()
@@ -85,12 +87,19 @@ def print_datastore_info(ds_obj):
 def main():
     args = get_args()
 
+    ssl_options = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH,
+                                            capath=None, cadata=None)
+    if args.insecure:
+        ssl_options.check_hostname = False
+        ssl_options.verify_mode = ssl.CERT_NONE
+
     # connect to vc
     si = SmartConnect(
         host=args.host,
         user=args.user,
         pwd=args.password,
-        port=args.port)
+        port=args.port,
+        sslContext=ssl_options)
     # disconnect vc
     atexit.register(Disconnect, si)
 
