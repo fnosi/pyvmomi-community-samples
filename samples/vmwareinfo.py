@@ -84,28 +84,35 @@ def main():
 
         content = service_instance.RetrieveContent()
 
-        print('**** content object: ****')
-        print(dir(content))
-        print('\n**** vim.Datacenter object: ****')
-        print(dir(vim.Datacenter))
-        print('\n**** vim.Datacenter.datastoreFolderobject: ****')
-        print(dir(vim.Datacenter.datastoreFolder))
-        print('\n**** vim.Datastore object: ****')
-        print(dir(vim.Datastore))
-        print('\n**** vim.ResourcePool object: ****')
-        print(dir(vim.ResourcePool))
+#        print('**** content object: ****')
+#        print(dir(content))
+#        print('\n**** vim.Datacenter object: ****')
+#        print(dir(vim.Datacenter))
+#        print('\n**** vim.Datacenter.datastoreFolderobject: ****')
+#        print(dir(vim.Datacenter.datastoreFolder))
+#        print('\n**** vim.Datastore object: ****')
+#        print(dir(vim.Datastore))
+#        print('\n**** vim.ResourcePool object: ****')
+#        print(dir(vim.ResourcePool))
         print('\n**** vim.VirtualMachine object: ****')
         print(dir(vim.VirtualMachine))
-        print('\n**** content.rootFolder object: ****')
-        print(dir(content.rootFolder))
+#        print('\n**** content.rootFolder object: ****')
+#        print(dir(content.rootFolder))
 
-        c = service_instance.RetrieveContent()
-        object_view = c.ViewManager.CreateContainerView(c.rootFolder, [], True)
+#        vchtime = service_instance.CurrentTime()
 
-        for obj in object_view.view:
-            print(ojb)
+#        object_view = content.ViewManager.CreateContainerView(content.rootFolder, [], True)
+#        for obj in object_view.view:
+#            print(ojb)
 
-        return 0
+        # Get all performance counters
+        perf_dict = {}
+        perfList = content.perfManager.perfCounter
+        for counter in perfList:
+            counter_full = "{}.{}.{}".format(counter.groupInfo.key, counter.nameInfo.key, counter.rollupType)
+            perf_dict[counter_full] = counter.key
+
+#        return 0
 
         container = content.rootFolder  # starting point to look into
         viewType = [vim.VirtualMachine]  # object types to look for
