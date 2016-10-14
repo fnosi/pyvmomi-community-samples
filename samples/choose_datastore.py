@@ -32,10 +32,15 @@ def get_args():
                         help="Filter by Datacenter. If both"
                                 " cluster and datacenter are set,"
                                 " only datacenter will be used.")
-    parser.add_argument('-c', '--cluster', required=False,
-                        help="Filter by Cluster. If both"
-                                " cluster and datacenter are set,"
-                                " only datacenter will be used.")
+# XXX TODO:
+#    parser.add_argument('-c', '--cluster', required=False,
+#                        help="Filter by Cluster. If both"
+#                                " cluster and datacenter are set,"
+#                                " only datacenter will be used.")
+    parser.add_argument('-m', '--max-free-space', required=False,
+                        default=False,
+                        action='store_true',
+                        help="Show only the multihosted datastore with the most free space")
     my_args = parser.parse_args()
     return cli.prompt_for_password(my_args)
 
@@ -48,7 +53,6 @@ def get_obj(content, vimtype, name=None, **kwargs):
     obj_container = kwargs.get('container', content.rootFolder)
     container = content.viewManager.CreateContainerView(
         obj_container, vimtype, True)
-#        content.rootFolder, vimtype, True)
     if name:
         for c in container.view:
             if c.name == name:
@@ -119,21 +123,22 @@ def main():
     # disconnect vc
     atexit.register(Disconnect, si)
 
-    print(vim.Datacenter)
-
     content = si.RetrieveContent()
-
-    # Get list of ds mo
-    #ds_obj_list = get_obj(content, [vim.Datastore], args.name)
 
     # Filter by Cluster - this returns no datastores later, maybe because Datastores
     # are contained inside Datacenters?
-    #cluster = get_obj(content, [vim.ClusterComputeResource], 'Cluster_Sviluppo')
-
-    # Filter by Datacenter
-    cluster = get_obj(content, [vim.Datacenter], 'ESX_Farm Sviluppo')
-    print(cluster)
-    ds_obj_list = get_obj(content, [vim.Datastore], container=cluster)
+    #if args.cluster:
+    #    search_container = [vim.ClusterComputeResource]
+    if args.datacenter:
+        search_container = [vim.Datacenter]
+        search_container_name = args.datacenter
+        container = get_obj(content, search_container, search_container_name)
+        if container is None:
+            print("Datacenter {} not found.".format(search_container_name))
+            return 0
+        ds_obj_list = get_obj(content, [vim.Datastore], container=container)
+    else:
+        ds_obj_list = get_obj(content, [vim.Datastore], args.name)
 
     max_freeSpace = 0
     choosen_ds = None
@@ -145,11 +150,13 @@ def main():
                 max_freeSpace = ds.summary.freeSpace
                 choosen_ds = ds
 
-    if choosen_ds is None:
-        print("No Datastore found")
-    else:
-        print("Choosen Datastore is:")
-        print_datastore_info(choosen_ds)
+    if args.max_free_space:
+        print("\n\n")
+        if choosen_ds is None:
+            print("No Datastore found")
+        else:
+            print("Choosen Datastore is:")
+            print_datastore_info(choosen_ds)
 
 # start
 if __name__ == "__main__":
