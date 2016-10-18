@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 #
+# Based on list_dc_datastore_info.py which carries this copyright:
+#
 # Written by JM Lopez
 # GitHub: https://github.com/jm66
 # Email: jm@jmll.me
