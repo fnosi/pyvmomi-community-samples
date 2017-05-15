@@ -34,11 +34,10 @@ def get_args():
                         help="Filter by Datacenter. If both"
                                 " cluster and datacenter are set,"
                                 " only datacenter will be used.")
-# XXX TODO:
-#    parser.add_argument('-c', '--cluster', required=False,
-#                        help="Filter by Cluster. If both"
-#                                " cluster and datacenter are set,"
-#                                " only datacenter will be used.")
+    parser.add_argument('-c', '--cluster', required=False,
+                        help="Filter by Cluster. If both"
+                                " cluster and datacenter are set,"
+                                " only datacenter will be used.")
     parser.add_argument('-m', '--max-free-space', required=False,
                         default=False,
                         action='store_true',
@@ -132,13 +131,23 @@ def main():
     #if args.cluster:
     #    search_container = [vim.ClusterComputeResource]
     if args.datacenter:
-        search_container = [vim.Datacenter]
-        search_container_name = args.datacenter
-        container = get_obj(content, search_container, search_container_name)
-        if container is None:
-            print("Datacenter {} not found.".format(search_container_name))
+        datacenter_name = args.datacenter
+        datacenter = get_obj(content, [vim.Datacenter], datacenter_name)
+        if datacenter is None:
+            print("Datacenter {} not found.".format(datacenter_name))
             return 0
-        ds_obj_list = get_obj(content, [vim.Datastore], container=container)
+        print("Found Datacenter {}".format(datacenter_name))
+        ds_obj_list = get_obj(content, [vim.Datastore], container=datacenter)
+    elif args.cluster:
+        cluster_name = args.cluster
+        cluster = get_obj(content, [vim.ClusterComputeResource], cluster_name)
+        if cluster is None:
+            print("Cluster {} not found.".format(cluster_name))
+            return 0
+        print("Found Cluster {}:".format(cluster_name))
+        print(cluster.summary)
+        #ds_obj_list = get_obj(content, [vim.Datastore], container=cluster)
+        ds_obj_list = cluster.datastore
     else:
         ds_obj_list = get_obj(content, [vim.Datastore], args.name)
 
