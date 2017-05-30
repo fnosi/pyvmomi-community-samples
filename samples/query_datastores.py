@@ -42,6 +42,10 @@ def get_args():
                         default=False,
                         action='store_true',
                         help="Show only the multihosted datastore with the most free space")
+    parser.add_argument('-v', '--verbose', required=False,
+                        default=False,
+                        action='store_true',
+                        help="Verbose output")
     my_args = parser.parse_args()
     return cli.prompt_for_password(my_args)
 
@@ -155,7 +159,8 @@ def main():
     choosen_ds = None
 
     for ds in ds_obj_list:
-        print_datastore_info(ds)
+        if args.verbose:
+            print_datastore_info(ds)
         if ds.summary.multipleHostAccess:
             if ds.summary.freeSpace > max_freeSpace:
                 max_freeSpace = ds.summary.freeSpace
